@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Concurrencytest by cgoldberg</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Concurrencytest</h1>
+        <p>Python testtools extension for running unittest suites concurrently.</p>
+
+        <p class="view"><a href="https://github.com/cgoldberg/concurrencytest">View the Project on GitHub <small>cgoldberg/concurrencytest</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/cgoldberg/concurrencytest/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/cgoldberg/concurrencytest/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/cgoldberg/concurrencytest">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="concurrencytest" class="anchor" href="#concurrencytest"><span class="octicon octicon-link"></span></a>concurrencytest</h1>
+
+<p><img src="https://raw.github.com/cgoldberg/concurrencytest/master/testing-goats.png" alt="testing goats" title="testing goats"></p>
+
+<p>Python testtools extension for running unittest suites concurrently.</p>
+
+<hr><p>Install from PyPI:</p>
+
+<pre><code>pip install concurrencytest
+</code></pre>
+
+<hr><p>Requires:</p>
+
+<ul>
+<li>
+<a href="https://pypi.python.org/pypi/testtools">testtools</a> : <code>pip install testtools</code>
+</li>
+<li>
+<a href="https://pypi.python.org/pypi/python-subunit">python-subunit</a> : <code>pip install python-subunit</code>
+</li>
+</ul><hr><p>Example:</p>
+
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">from</span> <span class="nn">concurrencytest</span> <span class="kn">import</span> <span class="n">ConcurrentTestSuite</span><span class="p">,</span> <span class="n">fork_for_tests</span>
+
+
+<span class="k">class</span> <span class="nc">SampleTestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">"""Dummy tests that sleep for demo."""</span>
+
+    <span class="k">def</span> <span class="nf">test_me_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_me_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_me_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_me_4</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+
+<span class="c"># Load tests from SampleTestCase defined above</span>
+<span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestLoader</span><span class="p">()</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">(</span><span class="n">SampleTestCase</span><span class="p">)</span>
+<span class="n">runner</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">()</span>
+
+<span class="c"># Run tests sequentially</span>
+<span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">)</span>
+
+<span class="c"># Run same tests across 4 processes</span>
+<span class="n">concurrent_suite</span> <span class="o">=</span> <span class="n">ConcurrentTestSuite</span><span class="p">(</span><span class="n">suite</span><span class="p">,</span> <span class="n">fork_for_tests</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">concurrent_suite</span><span class="p">)</span>
+</pre></div>
+
+<p>Output:</p>
+
+<pre><code>....
+----------------------------------------------------------------------
+Ran 4 tests in 2.003s
+
+OK
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.504s
+
+OK
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/cgoldberg">cgoldberg</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
