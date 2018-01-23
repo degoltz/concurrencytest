@@ -7,9 +7,9 @@ from setuptools import setup
 
 
 setup(
-    name='degoltz-concurrencytest',
+    name='degoltzconcurrencytest',
     version='0.0.1',
-    py_modules=['degoltz-concurrencytest'],
+    py_modules=['degoltzconcurrencytest'],
     install_requires=['python-subunit', 'testtools'],
     author='Corey Goldberg',
     author_email='cgoldberg _at_ gmail.com',
