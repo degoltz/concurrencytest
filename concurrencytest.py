@@ -28,6 +28,7 @@ import unittest
 from itertools import cycle
 from multiprocessing import cpu_count
 
+import multiprocessing
 from subunit import ProtocolTestCase, TestProtocolClient
 from subunit.test_results import AutoTimingTestResultDecorator
 
@@ -66,38 +67,41 @@ def fork_for_tests(concurrency_num=CPU_COUNT):
             # Also clear each split list so new suite has only reference
             process_tests[:] = []
             c2pread, c2pwrite = os.pipe()
-            pid = os.fork()
-            if pid == 0:
-                try:
-                    stream = os.fdopen(c2pwrite, 'wb', 1)
-                    os.close(c2pread)
-                    # Leave stderr and stdout open so we can see test noise
-                    # Close stdin so that the child goes away if it decides to
-                    # read from stdin (otherwise its a roulette to see what
-                    # child actually gets keystrokes for pdb etc).
-                    sys.stdin.close()
-                    subunit_result = AutoTimingTestResultDecorator(
-                        TestProtocolClient(stream)
-                    )
-                    process_suite.run(subunit_result)
-                except:
-                    # Try and report traceback on stream, but exit with error
-                    # even if stream couldn't be created or something else
-                    # goes wrong.  The traceback is formatted to a string and
-                    # written in one go to avoid interleaving lines from
-                    # multiple failing children.
-                    try:
-                        stream.write(traceback.format_exc())
-                    finally:
-                        os._exit(1)
-                os._exit(0)
-            else:
-                os.close(c2pwrite)
-                stream = os.fdopen(c2pread, 'rb', 1)
-                test = ProtocolTestCase(stream)
-                result.append(test)
+            p = multiprocessing.Process(target=_handle_work, args=(process_suite, c2pread, c2pwrite))
+            p.start()
+
+            os.close(c2pwrite)
+            stream = os.fdopen(c2pread, 'rb', 1)
+            test = ProtocolTestCase(stream)
+            result.append(test)
         return result
     return do_fork
+
+
+def _handle_work(process_suite, c2pread, c2pwrite):
+    try:
+        stream = os.fdopen(c2pwrite, 'wb', 1)
+        os.close(c2pread)
+        # Leave stderr and stdout open so we can see test noise
+        # Close stdin so that the child goes away if it decides to
+        # read from stdin (otherwise its a roulette to see what
+        # child actually gets keystrokes for pdb etc).
+        sys.stdin.close()
+        subunit_result = AutoTimingTestResultDecorator(
+            TestProtocolClient(stream)
+        )
+        process_suite.run(subunit_result)
+    except:
+        # Try and report traceback on stream, but exit with error
+        # even if stream couldn't be created or something else
+        # goes wrong.  The traceback is formatted to a string and
+        # written in one go to avoid interleaving lines from
+        # multiple failing children.
+        try:
+            stream.write(traceback.format_exc())
+        finally:
+            os._exit(1)
+    os._exit(0)
 
 
 def partition_tests(suite, count):
