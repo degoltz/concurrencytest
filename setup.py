@@ -7,15 +7,15 @@ from setuptools import setup
 
 
 setup(
-    name='concurrencytest',
-    version='0.1.2',
+    name='degoltz\concurrencytest',
+    version='0.0.1',
     py_modules=['concurrencytest'],
     install_requires=['python-subunit', 'testtools'],
     author='Corey Goldberg',
     author_email='cgoldberg _at_ gmail.com',
     description='testtools extension for running unittest suites concurrently',
-    url='https://github.com/cgoldberg/concurrencytest',
-    download_url='http://pypi.python.org/pypi/concurrencytest',
+    url='https://github.com/degoltz/concurrencytest',
+    download_url='https://github.com/degoltz/concurrencytest',
     keywords='test testtools unittest concurrency parallel'.split(),
     license='GNU GPLv3',
     classifiers=[
