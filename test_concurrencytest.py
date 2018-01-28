@@ -8,7 +8,7 @@ import unittest
 
 from testtools import try_imports, iterate_tests
 
-from concurrencytest import (
+from degoltzconcurrencytest import (
     ConcurrentTestSuite,
     fork_for_tests,
     partition_tests
